@@ -2,7 +2,7 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: working execution-monitoring prototype.** Policy testing, enforcement and guided generation are planned.
+**Current status: execution-monitoring prototype plus a first Python policy model.** A draft file-object policy and five passing model fixtures are available. Kernel enforcement and guided generation are planned.
 
 ## What works
 
@@ -40,10 +40,22 @@ After it prints `Attached`, run this in the second terminal:
 
     /usr/bin/python3 -S phase4_demo.py
 
+## Run the policy model
+
+From the repository directory, without sudo:
+
+    /usr/bin/python3 policy_model.py
+
+The model predicts decisions for the [draft file-object policy](docs/policy_contract_v0.md). It identifies a file using device major/minor and inode numbers. Its five fixtures check the original file, another file, a symbolic link, a rename and a fresh copy. Temporary files are removed after the run.
+
+A reported Ubuntu VM run matched all five fixed expected decisions. The fixtures inspect file identities; they never execute the copied programs and load no eBPF policy. `DENY` is an expected policy decision, not evidence of kernel blocking. `ALLOW` means this policy adds no denial; other Linux checks still apply.
+
 ## Files
 
 - `phase3_sentinel.py`: kernel observer, event reader and alert rules.
 - `phase4_demo.py`: controlled demonstration using benign commands.
+- `policy_model.py`: independent policy predictions and five filesystem fixtures.
+- `docs/policy_contract_v0.md`: draft rule, scope, identities and expected cases.
 - `PROJECT_STATE.md`: progress, evidence, limits and next action.
 
 ## Evidence and limits
@@ -62,6 +74,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-Planned work: one narrow policy contract, an independent expected-result model, workload-scoped enforcement in a disposable environment, independent outcome checks, deterministic tests, valid random and guided generation, reactive selection, failing-sequence reduction and equal-budget evaluation with repeated seeds.
+The first draft contract and a Python model core with five filesystem fixtures are implemented. Remaining work: review security updates and the final supported lab kernel; build independent execution-outcome checks, workload-scoped enforcement, broader deterministic tests, valid random and guided generation, reactive selection, failing-sequence reduction and equal-budget evaluation with repeated seeds.
 
-These research components are not implemented. No novelty, security vulnerability or performance improvement has been established.
+The remaining research components are not implemented. The five model passes do not verify an enforcer or the full contract. No novelty, security vulnerability or performance improvement has been established.
