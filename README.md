@@ -2,7 +2,24 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: an execution observer, a first Python policy model and tested LSM cgroup-ID lookup diagnostics.** A draft file-object policy and five passing model fixtures are available. The kernel scope filter, enforcement and guided generation remain planned.
+**Current status: a cgroup-scoped BCC reference enforcer passed its first six fixed execution cases.** Independent measurements confirmed four executions and two EPERM denials. Mutation testing and random-versus-guided evaluation are not implemented.
+
+## First kernel-enforcement result
+
+Recorded on 2026-11-10 in SentinelLab, Ubuntu 24.04, kernel `6.8.0-149-generic`, BCC `0.29.1+ds-1ubuntu7`.
+
+| Case | Baseline without Sentinel | Expected with policy | Observed with policy |
+|---|---|---|---|
+| Original allowed file | Executed | ALLOW | Executed; correct marker; exit 0 |
+| Different file in scope | Executed | DENY | exec failed with EPERM; no marker |
+| Symbolic link to allowed file | Executed | ALLOW | Executed; correct marker; exit 0 |
+| Allowed file after rename | Executed | ALLOW | Executed; correct marker; exit 0 |
+| Fresh copy in scope | Executed | DENY | exec failed with EPERM; no marker |
+| Different file outside scope | Executed | ALLOW | Executed; correct marker; exit 0 |
+
+All six baseline executions and all six policy expectations matched in one recorded enforcement run. Outcomes came from an ELF entry marker, a close-on-exec exec-error pipe and child exit status, independently of BPF decision logs. Identity-read errors would invalidate a case; none were reported. The enforcer detached, temporary workload group was removed and the service exited successfully.
+
+This is a small deterministic result, not an accuracy percentage, performance benchmark or proof of the whole contract. Earlier-denial composition, mutants and generator effectiveness are untested. See [the result record](docs/enforcement_results_v0.md) for the commands, evidence and remaining limits.
 
 ## What works
 
@@ -40,6 +57,20 @@ After it prints `Attached`, run this in the second terminal:
 
     /usr/bin/python3 -S phase4_demo.py
 
+## Reproduce the execution checks
+
+Run these commands inside the SentinelLab VM with BPF-LSM active. The controller stays in the delegated service's `controller` subgroup; only fresh in-scope children enter its separate `workload` subgroup. The service has a 45-second runtime limit. Python's system BCC package and the C compiler are required.
+
+First check the fixtures and independent outcome measurement without loading BPF:
+
+    sudo systemd-run --unit=sentinel-enforcement-check --uid=root --wait --pipe --collect --property=Delegate=yes --property=DelegateSubgroup=controller --property=RuntimeMaxSec=45s /usr/bin/python3 -u "$HOME/runtime-sentinel/enforcement_check.py" --baseline
+
+Then run the same baseline followed by the scoped reference enforcer:
+
+    sudo systemd-run --unit=sentinel-enforcement-check --uid=root --wait --pipe --collect --property=Delegate=yes --property=DelegateSubgroup=controller --property=RuntimeMaxSec=45s /usr/bin/python3 -u "$HOME/runtime-sentinel/enforcement_check.py" --enforce
+
+The second command deliberately denies the two in-scope non-allowed files with EPERM. It adds no policy denial for the controller or the outside-scope fixture. The probe is temporary and detached during cleanup. Both commands require an existing `~/runtime-sentinel` checkout containing the model and scope-reader modules.
+
 ## Run the policy model
 
 From the repository directory, without sudo:
@@ -66,7 +97,7 @@ The Python reader uses `name_to_handle_at()` to obtain the cgroup v2 file-handle
 
 Both reported runs passed. Recorded IDs were 8922 in the SSH session and 9692 in the temporary service. These are historical observations, not configuration constants. Resolve the ID of each live test cgroup again.
 
-The LSM hook is attached system-wide and returns the incoming BPF decision unchanged. Running its loader in a service changes process membership, not the hook's attachment scope. These checks verify lookup and observation for the tested children; they do not test an inside/outside filter, blocking, prior-denial composition, namespaces or concurrent migration. The future enforcement controller will stay outside the controlled workload cgroup.
+The LSM hook is attached system-wide and returns the incoming BPF decision unchanged. Running its loader in a service changes process membership, not the hook's attachment scope. These checks verify lookup and observation for the tested children; they do not test an inside/outside filter, blocking, prior-denial composition, namespaces or concurrent migration. The separate enforcement harness keeps its controller outside the controlled workload cgroup.
 
 ## Files
 
@@ -74,6 +105,9 @@ The LSM hook is attached system-wide and returns the incoming BPF decision uncha
 - `phase4_demo.py`: controlled demonstration using benign commands.
 - `policy_model.py`: independent policy predictions and five filesystem fixtures.
 - `scope_handle_check.py`: canonical file-handle/kernel cgroup-ID comparison.
+- `scope_filter_check.py`: observation-only inside/outside LSM scope classification.
+- `enforcement_check.py`: baseline and six-case kernel enforcement checks with independent outcomes.
+- `docs/enforcement_results_v0.md`: first recorded kernel-enforcement result and reproduction details.
 - `scope_identity_check.py`: earlier inode comparison diagnostic; not the policy's cgroup-ID lookup.
 - `docs/policy_contract_v0.md`: draft rule, scope, identities and expected cases.
 - `PROJECT_STATE.md`: progress, evidence, limits and next action.
@@ -94,6 +128,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The draft contract, Python model core with five filesystem fixtures and LSM cgroup-ID lookup diagnostics are implemented. Remaining work: finish persistent lab boot selection, review remaining package updates, implement an observation-only kernel scope filter, build independent execution-outcome checks and workload-scoped enforcement, then add broader deterministic tests, valid random and guided generation, reactive selection, failing-sequence reduction and equal-budget evaluation with repeated seeds.
+The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Next: detect a deliberately inserted, scope-preserving fault, repeat its failing case, and build a reproducible mutant evaluation before integrating a real engine. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
 
-The remaining research components are not implemented. The five model passes do not verify an enforcer or the full contract. No novelty, security vulnerability or performance improvement has been established.
+Mutants, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.

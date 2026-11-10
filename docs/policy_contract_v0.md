@@ -1,6 +1,6 @@
 # Sentinel execution-policy contract v0
 
-Status: Draft specification. A Python model core and five filesystem fixtures are implemented; a reported VM run matched all five expected decisions. The blocking program is not implemented.
+Status: Draft specification. The model, independent execution-outcome harness and scoped BCC reference enforcer are implemented. One recorded VM run matched the five in-scope expectations and one outside-scope control. This does not verify the whole contract; prior-denial composition remains untested.
 
 ## Purpose
 
@@ -33,9 +33,11 @@ test services or previous boots. Keep the trusted policy controller outside
 the workload cgroup. An allowed executable's device/inode identity and a
 workload's cgroup ID are different identifiers.
 
-Lookup diagnostics have passed in the lab's SSH session and a temporary
-service. They preserve the incoming BPF decision and do not test a scope
-filter or blocking. Namespace changes and concurrent changes to membership
+Lookup diagnostics passed in the lab's SSH session and a temporary
+service. A separate observation-only classifier passed one inside and one
+outside case. The enforcement harness then matched five in-scope decisions
+and one outside-scope control; its controller stayed outside the workload.
+The lookup diagnostics themselves do not block execution. Namespace changes and concurrent changes to membership
 or cgroup lifetime during an armed case remain outside the initial contract.
 
 ## File identity
@@ -56,7 +58,7 @@ File contents and policy bindings stay fixed during each case.
 
 ## Five expected cases
 
-These are predictions for review, not results from an implemented enforcer.
+These predictions define the fixed cases. Their first kernel enforcement run matched all five, plus an outside-scope control; see [the result record](enforcement_results_v0.md).
 
 | Case | Action | Expected | Reason |
 |---|---|---|---|
@@ -66,7 +68,7 @@ These are predictions for review, not results from an implemented enforcer.
 | allow_renamed | Rename A and execute its new name | Allow | Its identity remains A |
 | deny_copy | Copy A to a fresh file and execute the copy | Deny | The copy is another object |
 
-## Planned decision flow
+## Reference decision flow
 
 ```mermaid
 flowchart TD
@@ -79,7 +81,7 @@ flowchart TD
     F -->|No| G["Deny with EPERM"]
 ```
 
-The arrows show the order of decisions in the planned LSM program.
+The arrows show the decision order in the reference LSM program. The source preserves an incoming nonzero BPF return value, but the first six cases do not exercise an actual earlier BPF denial.
 
 ## Outcome verification
 
@@ -111,9 +113,11 @@ Passing them checks those examples, not kernel enforcement or the full contract.
 
 ## Next step
 
-Record the tested lab baseline and finish persistent boot selection.
-Review the remaining package updates before research evaluation.
-Implement an observation-only scope classifier with its controller outside
-the workload cgroup. Then build independent checks of execution outcomes,
-using baseline runs, exec errors and entry markers, before adding the
-workload-scoped reference enforcer.
+Checkpoint the first six fixed enforcement results and their tested source.
+Introduce one deliberate scope-preserving fault and repeat a failing case
+before expanding to multiple mutants or random/guided comparisons. An
+independent, immutable experiment boundary is required before introducing
+a mutant that can remove the policy scope check. Prior-denial composition
+needs its own fixture. Keep unsupported transitions outside v0 until their
+semantics and independent measurements are specified.
+Persistent boot selection and remaining package updates still need review.
