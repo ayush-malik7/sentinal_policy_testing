@@ -2,7 +2,22 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: two deliberately inserted fault families were detected in separate kernel diagnostics, each repeated in two fresh trials.** The inode fault caused false allows; the pathname fault caused false denials. Random-versus-guided evaluation is not implemented.
+**Current status: three planted fault families have been detected in fixed kernel diagnostics.** A new seven-case diagnostic distinguishes full-path and basename comparison using different file objects with the same filename. Random-versus-guided evaluation is not implemented.
+
+## Same-basename witness (2026-11-11)
+
+The new fixture uses an allowed file named `program_a` and a different copy at `other/program_a`. Both are on device 8:2; their observed inode numbers were 3670097 and 3670098. The model expects DENY for the copy.
+
+| New case: deny_same_basename | Correct reference | Full-path mutant | Basename mutant |
+|---|---|---|---|
+| Trial 1 | DENY | DENY | ALLOW: mismatch |
+| Trial 2 | DENY | DENY | ALLOW: mismatch |
+
+Each trial passed all seven baselines and all seven reference controls. Over the two trials, the full-path mutant produced four false-denial observations; the basename mutant produced four false denials plus two false allows. The seventh case distinguishes the two name-based operators; their first mismatches still occurred at fixed position 3, so this does not establish faster detection.
+
+All six probes detached, both workload groups were removed and the service exited 0. Results come from ELF markers, exec-error pipes and child status. The earlier inode mutant was not run on the new seventh case. These are fixed diagnostic results, not a seeded generator comparison or a general mutation score.
+
+See [the seven-case result and reproduction command](docs/mutant_basename_results_v0.md) and [the fault catalog](docs/fault_catalog_v0.md).
 
 ## Two planted fault families
 
@@ -139,6 +154,8 @@ The LSM hook is attached system-wide and returns the incoming BPF decision uncha
 - `enforcement_check.py`: baseline and six-case kernel enforcement checks with independent outcomes.
 - `mutant_inode_check.py`: two fresh reference/mutant trials for a deliberate inode-comparison fault.
 - `mutant_path_check.py`: two fresh trials for requested-path/file-object confusion.
+- `mutant_basename_check.py`: seven-case reference/path/basename comparison with a same-name different-object witness.
+- `docs/mutant_basename_results_v0.md`: observed seven-case comparison, lifecycle notes and limits.
 - `docs/mutant_path_results_v0.md`: pathname fault observations and reproduction.
 - `docs/fault_catalog_v0.md`: observed, proposed and unexercised fault operators and their prerequisites.
 - `docs/mutant_inode_results_v0.md`: recorded single-mutant evidence, reproduction command and limits.
@@ -163,6 +180,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Two scope-preserving fault families have now been detected in separate fixed-order diagnostics, each repeated with fresh setup. The fault catalog distinguishes observed results from proposed or unexercised operators. Next: add a distinguishable supported witness for another fault family and define the shared valid input domain and coverage features before generator comparison or real-engine integration. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
+The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Three scope-preserving fault families have witness cases; the seven-case diagnostic now distinguishes the two name-based faults in two fresh trials. The fault catalog separates observations from proposed or unexercised operators. Next: define the shared valid input domain and model-derived coverage features before a pilot generator comparison, then broaden the supported fault set. Real-engine integration remains later work. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
 
-Two fixed mutant diagnostics are implemented. A broader evaluated fault set, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
+Fixed diagnostics cover three planted fault families. A broader evaluated fault set, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.

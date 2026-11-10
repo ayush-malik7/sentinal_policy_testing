@@ -21,7 +21,7 @@ does not establish execution or denial.
 |---|---|---|---|
 | ignore_inode | Compare device alone | Same-device different file or copy executes despite expected DENY | Observed: one fault detected in two fresh trials; source/result published in 81b8ec9 |
 | requested_path_identity | Compare the supplied pathname with A's original pathname | Symlink or renamed A is denied despite expected ALLOW | Observed: detected in two fresh trials; mutant_path_check.py and its result are included in this checkpoint |
-| basename_identity | Compare only a filename's last component | Fresh different file with the same basename as A executes | Proposed: add same-basename witness; distinguish from full-path fault |
+| basename_identity | Compare only a requested filename's last component | Fresh different file with the same basename as A executes | Observed: seven-case diagnostic distinguished it from full-path comparison in two fresh trials; result included in this checkpoint |
 | caller_executable_identity | Inspect the caller's executable instead of the requested executable | Controlled native A attempts exec of B; target B should be denied | Proposed: requires a native A-to-B sequence and hook-timing validation |
 | skip_scope | Apply A's rule outside its selected cgroup | Different file outside scope is denied despite expected ALLOW | Blocked until an independent experiment boundary is implemented and tested |
 | ancestor_scope | Apply an exact-cgroup policy to its descendants | Different file in a nested descendant is denied despite being outside exact scope | Proposed: nested-group witness and independent experiment boundary required |
@@ -55,7 +55,9 @@ outside the policy logic that mutations may change.
 5. Record all mismatches. Repeat unexpected outcomes on fresh setup before confirming them.
 6. Keep harness errors, unsupported operations and inconclusive outcomes separate from policy mismatches.
 
-Each existing diagnostic uses two fresh fixed-order trials. They are not
-random seeds and do not measure an advantage of guided selection.
+Each recorded diagnostic uses two fresh fixed-order trials. The latest
+compares the full-path and basename faults on seven cases; the earlier inode
+diagnostic used six. These are not random seeds and do not measure an
+advantage of guided selection.
 Stateful sequences need defined transition
 semantics and independent outcome checks before they enter the evaluation.

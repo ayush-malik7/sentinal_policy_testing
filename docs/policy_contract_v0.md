@@ -118,8 +118,12 @@ fault in 81b8ec9. A separate pathname fault was also detected in two fresh
 trials; see its [result](mutant_path_results_v0.md) and the
 [fault catalog](fault_catalog_v0.md). These diagnostics retain the original
 file-object expectations; a requested-path comparison is a deliberate fault
-relative to this contract. Next, add supported witnesses for distinct faults
-and define shared valid inputs and coverage features for generator comparison.
+relative to this contract. A later [seven-case diagnostic](mutant_basename_results_v0.md)
+added a different-object copy with A's basename, expected DENY, and distinguished
+the two name-based faults in two fresh trials. This fixture uses the existing
+copy semantics; it does not add deletion/recreation or concurrent mutations.
+Next, define shared valid inputs, model-derived coverage and pilot evaluation
+rules before generator comparison, then broaden the supported fault set.
 An independent immutable experiment boundary is required before any
 scope-removing mutant. Actual prior-denial composition remains untested.
 Keep unsupported transitions outside v0 until their semantics and independent
