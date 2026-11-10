@@ -2,7 +2,20 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: a cgroup-scoped BCC reference enforcer passed its first six fixed execution cases.** Independent measurements confirmed four executions and two EPERM denials. Mutation testing and random-versus-guided evaluation are not implemented.
+**Current status: the scoped reference enforcer passed its fixed checks, and one deliberately inserted inode-comparison fault was detected in two fresh trials.** This is a deterministic single-mutant diagnostic. Random-versus-guided evaluation is not implemented.
+
+## First planted-fault result
+
+On 2026-11-10, the single-mutant diagnostic removed only the inode comparison from the reference C program. Device checks, exact cgroup scope and incoming-BPF-return handling remained in the source. The model's expected answers stayed unchanged.
+
+| Fresh trial | Baseline executions | Correct-reference matches | Mutant mismatches |
+|---|---|---|---|
+| 1 | 6/6 | 6/6 | deny_other and deny_copy unexpectedly executed |
+| 2 | 6/6 | 6/6 | deny_other and deny_copy unexpectedly executed |
+
+Both reference and mutant probes detached; both workload groups were removed; the service exited 0. The mismatches were measured through the native ELF marker, exec-error pipe and child status, independently of BPF decision logs.
+
+This demonstrates repeated detection of **one planted fault**, not two mutants, random seeds, a vulnerability finding or an advantage over random testing. See [the single-mutant result and command](docs/mutant_inode_results_v0.md).
 
 ## First kernel-enforcement result
 
@@ -19,7 +32,7 @@ Recorded on 2026-11-10 in SentinelLab, Ubuntu 24.04, kernel `6.8.0-149-generic`,
 
 All six baseline executions and all six policy expectations matched in one recorded enforcement run. Outcomes came from an ELF entry marker, a close-on-exec exec-error pipe and child exit status, independently of BPF decision logs. Identity-read errors would invalidate a case; none were reported. The enforcer detached, temporary workload group was removed and the service exited successfully.
 
-This is a small deterministic result, not an accuracy percentage, performance benchmark or proof of the whole contract. Earlier-denial composition, mutants and generator effectiveness are untested. See [the result record](docs/enforcement_results_v0.md) for the commands, evidence and remaining limits.
+This is a small deterministic result, not an accuracy percentage, performance benchmark or proof of the whole contract. Earlier-denial composition and generator effectiveness are untested. The follow-up above records the separate single-mutant diagnostic. See [the result record](docs/enforcement_results_v0.md) for the commands, evidence and remaining limits.
 
 ## What works
 
@@ -107,6 +120,8 @@ The LSM hook is attached system-wide and returns the incoming BPF decision uncha
 - `scope_handle_check.py`: canonical file-handle/kernel cgroup-ID comparison.
 - `scope_filter_check.py`: observation-only inside/outside LSM scope classification.
 - `enforcement_check.py`: baseline and six-case kernel enforcement checks with independent outcomes.
+- `mutant_inode_check.py`: two fresh reference/mutant trials for a deliberate inode-comparison fault.
+- `docs/mutant_inode_results_v0.md`: recorded single-mutant evidence, reproduction command and limits.
 - `docs/enforcement_results_v0.md`: first recorded kernel-enforcement result and reproduction details.
 - `scope_identity_check.py`: earlier inode comparison diagnostic; not the policy's cgroup-ID lookup.
 - `docs/policy_contract_v0.md`: draft rule, scope, identities and expected cases.
@@ -128,6 +143,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Next: detect a deliberately inserted, scope-preserving fault, repeat its failing case, and build a reproducible mutant evaluation before integrating a real engine. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
+The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. One scope-preserving fault has now been detected in two fresh fixed-order trials. Next: define distinct executable fault operators and their supported witnesses, then build a reproducible mutant evaluation before integrating a real engine. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
 
-Mutants, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
+One fixed single-mutant diagnostic is implemented; a broader mutant set, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.

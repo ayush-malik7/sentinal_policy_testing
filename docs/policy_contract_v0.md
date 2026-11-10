@@ -113,11 +113,13 @@ Passing them checks those examples, not kernel enforcement or the full contract.
 
 ## Next step
 
-Checkpoint the first six fixed enforcement results and their tested source.
-Introduce one deliberate scope-preserving fault and repeat a failing case
-before expanding to multiple mutants or random/guided comparisons. An
-independent, immutable experiment boundary is required before introducing
-a mutant that can remove the policy scope check. Prior-denial composition
+The first six fixed enforcement results were published in commit 7194e41.
+A follow-up diagnostic detected an inode-comparison fault in two fresh
+trials; see [the single-mutant record](mutant_inode_results_v0.md).
+Its checkpoint also records mutant_inode_check.py. Next, specify supported
+fault operators, witnesses and a shared input domain for random/guided
+selection. An independent immutable experiment boundary is required before
+any mutant that removes scope checking. Prior-denial composition still
 needs its own fixture. Keep unsupported transitions outside v0 until their
 semantics and independent measurements are specified.
 Persistent boot selection and remaining package updates still need review.

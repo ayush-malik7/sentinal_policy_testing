@@ -62,6 +62,6 @@ This is a single six-case deterministic result. It does not establish 100 percen
 
 Actual earlier-BPF-denial composition, hardlinks, multiple allowed entries, executable inode reuse, concurrent mutation/migration, namespace changes and instrumentation failure paths were not tested. Some of those operations are outside the current v0 contract.
 
-Next, deliberately ignore inode while retaining the device comparison and exact scope check. A same-filesystem different file or copy should then execute unexpectedly. Repeat the failing case before reporting a detected planted fault. This is not a discovered vulnerability in Linux or another product.
+Follow-up: the [single-mutant experiment](mutant_inode_results_v0.md) ignored inode while retaining device and exact scope checks. In two fresh trials, the same-filesystem different-file and copy cases executed unexpectedly; the correct reference passed its six controls in each trial. This detected one deliberately inserted fault, not a vulnerability in Linux or another product.
 
 Before testing any mutant that removes scope checking, add a separate immutable experiment boundary that enrolls only the intended test children, including the outside-scope control. The controller and other host processes must remain outside that boundary. The future random/guided evaluation needs fixed valid inputs, equal budgets, repeated seeds and explicit reporting of undetected runs.
