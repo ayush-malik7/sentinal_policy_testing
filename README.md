@@ -2,7 +2,24 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: the scoped reference enforcer passed its fixed checks, and one deliberately inserted inode-comparison fault was detected in two fresh trials.** This is a deterministic single-mutant diagnostic. Random-versus-guided evaluation is not implemented.
+**Current status: two deliberately inserted fault families were detected in separate kernel diagnostics, each repeated in two fresh trials.** The inode fault caused false allows; the pathname fault caused false denials. Random-versus-guided evaluation is not implemented.
+
+## Two planted fault families
+
+Recorded on 2026-11-10 in SentinelLab, kernel `6.8.0-149-generic`. The expected model stayed unchanged and outcomes came from ELF markers, exec-error pipes and child exit status.
+
+| Fixed case | Model | Correct controls | Inode mutant | Requested-path mutant |
+|---|---|---|---|---|
+| allow_original | ALLOW | ALLOW | ALLOW | ALLOW |
+| deny_other | DENY | DENY | ALLOW: mismatch | DENY |
+| allow_symlink | ALLOW | ALLOW | ALLOW | DENY: mismatch |
+| allow_renamed | ALLOW | ALLOW | ALLOW | DENY: mismatch |
+| deny_copy | DENY | DENY | ALLOW: mismatch | DENY |
+| allow_outside_scope | ALLOW | ALLOW | ALLOW | ALLOW |
+
+Each column's observed pattern repeated in two fresh trials of its diagnostic, with all six baselines and all six correct-reference controls passing per trial. All probes detached, workload groups were removed and services exited successfully. These are two planted faults tested separately, not a seeded multi-mutant evaluation or a general mutation score.
+
+See the [pathname result and command](docs/mutant_path_results_v0.md), [inode result](docs/mutant_inode_results_v0.md) and [fault catalog with prerequisites](docs/fault_catalog_v0.md). Actual earlier-denial composition and random/guided effectiveness remain untested.
 
 ## First planted-fault result
 
@@ -121,6 +138,9 @@ The LSM hook is attached system-wide and returns the incoming BPF decision uncha
 - `scope_filter_check.py`: observation-only inside/outside LSM scope classification.
 - `enforcement_check.py`: baseline and six-case kernel enforcement checks with independent outcomes.
 - `mutant_inode_check.py`: two fresh reference/mutant trials for a deliberate inode-comparison fault.
+- `mutant_path_check.py`: two fresh trials for requested-path/file-object confusion.
+- `docs/mutant_path_results_v0.md`: pathname fault observations and reproduction.
+- `docs/fault_catalog_v0.md`: observed, proposed and unexercised fault operators and their prerequisites.
 - `docs/mutant_inode_results_v0.md`: recorded single-mutant evidence, reproduction command and limits.
 - `docs/enforcement_results_v0.md`: first recorded kernel-enforcement result and reproduction details.
 - `scope_identity_check.py`: earlier inode comparison diagnostic; not the policy's cgroup-ID lookup.
@@ -143,6 +163,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. One scope-preserving fault has now been detected in two fresh fixed-order trials. Next: define distinct executable fault operators and their supported witnesses, then build a reproducible mutant evaluation before integrating a real engine. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
+The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Two scope-preserving fault families have now been detected in separate fixed-order diagnostics, each repeated with fresh setup. The fault catalog distinguishes observed results from proposed or unexercised operators. Next: add a distinguishable supported witness for another fault family and define the shared valid input domain and coverage features before generator comparison or real-engine integration. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
 
-One fixed single-mutant diagnostic is implemented; a broader mutant set, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
+Two fixed mutant diagnostics are implemented. A broader evaluated fault set, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
