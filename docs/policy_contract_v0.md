@@ -17,6 +17,27 @@ The existing execution observer remains a diagnostic tool.
 - Always preserve a denial from an earlier BPF program.
 - An allow decision from our rule does not override other Linux security checks.
 
+## Scope identifier and binding
+
+Use the kernel's 64-bit cgroup v2 ID for scope membership. Userspace obtains
+the ID of the chosen live cgroup through name_to_handle_at(), using the
+eight-byte cgroup file-handle format used by the Linux BPF self-tests.
+The LSM program reads bpf_get_current_cgroup_id() and will compare it with
+the registered target ID. Do not substitute a generic directory inode
+without a documented mapping. In the canonical diagnostic, the inode is
+printed only for diagnosis and is not the reference ID or a fallback.
+
+Resolve each selected group's ID while that group is live. Resolve it again
+when creating a replacement group. Do not reuse IDs recorded from finished
+test services or previous boots. Keep the trusted policy controller outside
+the workload cgroup. An allowed executable's device/inode identity and a
+workload's cgroup ID are different identifiers.
+
+Lookup diagnostics have passed in the lab's SSH session and a temporary
+service. They preserve the incoming BPF decision and do not test a scope
+filter or blocking. Namespace changes and concurrent changes to membership
+or cgroup lifetime during an armed case remain outside the initial contract.
+
 ## File identity
 
 Identify A using device major number, device minor number and inode number.
@@ -90,6 +111,9 @@ Passing them checks those examples, not kernel enforcement or the full contract.
 
 ## Next step
 
-Review pending security updates and choose the final supported lab kernel.
-Build a controlled execution-outcome harness with baseline runs, exec errors and
-entry markers, then add the workload-scoped reference enforcer.
+Record the tested lab baseline and finish persistent boot selection.
+Review the remaining package updates before research evaluation.
+Implement an observation-only scope classifier with its controller outside
+the workload cgroup. Then build independent checks of execution outcomes,
+using baseline runs, exec errors and entry markers, before adding the
+workload-scoped reference enforcer.

@@ -2,7 +2,7 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: execution-monitoring prototype plus a first Python policy model.** A draft file-object policy and five passing model fixtures are available. Kernel enforcement and guided generation are planned.
+**Current status: an execution observer, a first Python policy model and tested LSM cgroup-ID lookup diagnostics.** A draft file-object policy and five passing model fixtures are available. The kernel scope filter, enforcement and guided generation remain planned.
 
 ## What works
 
@@ -50,11 +50,31 @@ The model predicts decisions for the [draft file-object policy](docs/policy_cont
 
 A reported Ubuntu VM run matched all five fixed expected decisions. The fixtures inspect file identities; they never execute the copied programs and load no eBPF policy. `DENY` is an expected policy decision, not evidence of kernel blocking. `ALLOW` means this policy adds no denial; other Linux checks still apply.
 
+## Check the LSM cgroup identifier
+
+The reported lab test boot used Ubuntu 24.04, kernel `6.8.0-149-generic` and BCC `0.29.1+ds-1ubuntu7`, with `bpf` in the active LSM list. This was a one-time GRUB test selection; a persistent lab boot default has not been configured. The existing observer demo also passed on this kernel: 118 received events, two matching demo alerts, zero reported perf losses, the loopback marker and a clean exit.
+
+From the repository directory, run the canonical identifier diagnostic:
+
+    sudo /usr/bin/python3 -u scope_handle_check.py
+
+Then run it in a separate temporary service cgroup:
+
+    sudo systemd-run --unit=sentinel-handle-check --uid=root --wait --pipe --collect --property=RuntimeMaxSec=20s /usr/bin/python3 -u "$PWD/scope_handle_check.py"
+
+The Python reader uses `name_to_handle_at()` to obtain the cgroup v2 file-handle ID. It checks the eight-byte ID format used by the [Linux BPF self-tests](https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux/+/5920da4455a393490309d6483636b9749ec785fd/tools/testing/selftests/bpf/cgroup_helpers.c). The LSM probe records `bpf_get_current_cgroup_id()` for a harmless child. PASS requires the two cgroup IDs to match for that child's PID; the directory inode is printed only for diagnosis, with no fallback to it.
+
+Both reported runs passed. Recorded IDs were 8922 in the SSH session and 9692 in the temporary service. These are historical observations, not configuration constants. Resolve the ID of each live test cgroup again.
+
+The LSM hook is attached system-wide and returns the incoming BPF decision unchanged. Running its loader in a service changes process membership, not the hook's attachment scope. These checks verify lookup and observation for the tested children; they do not test an inside/outside filter, blocking, prior-denial composition, namespaces or concurrent migration. The future enforcement controller will stay outside the controlled workload cgroup.
+
 ## Files
 
 - `phase3_sentinel.py`: kernel observer, event reader and alert rules.
 - `phase4_demo.py`: controlled demonstration using benign commands.
 - `policy_model.py`: independent policy predictions and five filesystem fixtures.
+- `scope_handle_check.py`: canonical file-handle/kernel cgroup-ID comparison.
+- `scope_identity_check.py`: earlier inode comparison diagnostic; not the policy's cgroup-ID lookup.
 - `docs/policy_contract_v0.md`: draft rule, scope, identities and expected cases.
 - `PROJECT_STATE.md`: progress, evidence, limits and next action.
 
@@ -74,6 +94,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The first draft contract and a Python model core with five filesystem fixtures are implemented. Remaining work: review security updates and the final supported lab kernel; build independent execution-outcome checks, workload-scoped enforcement, broader deterministic tests, valid random and guided generation, reactive selection, failing-sequence reduction and equal-budget evaluation with repeated seeds.
+The draft contract, Python model core with five filesystem fixtures and LSM cgroup-ID lookup diagnostics are implemented. Remaining work: finish persistent lab boot selection, review remaining package updates, implement an observation-only kernel scope filter, build independent execution-outcome checks and workload-scoped enforcement, then add broader deterministic tests, valid random and guided generation, reactive selection, failing-sequence reduction and equal-budget evaluation with repeated seeds.
 
 The remaining research components are not implemented. The five model passes do not verify an enforcer or the full contract. No novelty, security vulnerability or performance improvement has been established.

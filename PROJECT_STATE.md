@@ -44,6 +44,28 @@ The observer does not prove execution success, prevention or policy correctness.
 - These fixtures inspect real filesystem identities but do not execute the copied ELF programs, create a test cgroup or load an enforcement probe. Kernel blocking has not been tested.
 - Scope, prior-denial and supported-case facts are inputs to the model. These five fixtures use the supported, in-scope, no-prior-denial setting; they do not validate kernel cgroup membership or BPF denial chaining.
 
+## GA kernel and cgroup-ID lookup checks (2026-11-10)
+
+- The user confirmed a fresh pre-kernel-change snapshot and approved the GA kernel installation and test boot. No kernel packages were removed.
+- Running test kernel: 6.8.0-149-generic. Matching kernel headers are installed. This boot was selected once with grub-reboot; persistent lab boot selection remains pending.
+- Active LSM list reported: lockdown,capability,landlock,yama,apparmor,bpf.
+- CONFIG_BPF=y, CONFIG_BPF_SYSCALL=y, CONFIG_BPF_LSM=y, CONFIG_SECURITY=y and CONFIG_DEBUG_INFO_BTF=y were verified in the installed kernel configuration.
+- CONFIG_INTEGRITY=y, CONFIG_IMA=y and CONFIG_EVM=y were also verified. IMA/EVM are not separately listed in the reported active LSM list on this kernel; their policy enforcement has not been audited by these checks.
+- BCC Python/library packages remain 0.29.1+ds-1ubuntu7. Kernel 7.0 was only simulated, not installed through this work.
+- GCC/Make development tools and Perl were installed for Guest Additions. Its 7.1.10 vboxguest/vboxsf module files have 6.8.0-149 vermagic. Its vboxvideo build failed on an undeclared drm_fb_helper_alloc_info; that graphics build issue remains unresolved. The actual display device is 15ad:0405 and the booted VM uses Ubuntu's vmwgfx driver. Complete Guest Additions feature validation is not claimed.
+- Observer demo on 6.8: received=118, alerts=2, perf_lost=0, possibly_truncated_paths=0. Normal true produced no matching alert; shell and loopback cases alerted, the marker arrived and shutdown completed.
+- Canonical lookup now uses name_to_handle_at on the cgroup v2 directory, following the Linux BPF self-test method for its eight-byte cgroup ID. An unexpected handle size or syscall error stops the check; there is no inode fallback. The executable-file identity model remains device major/minor plus inode.
+
+| Canonical test context | Child PID | Userspace file-handle ID | LSM-observed ID | Outcome |
+|---|---:|---:|---:|---|
+| SSH session-6.scope | 21837 | 8922 | 8922 | PASS; child exit 0; probe detached |
+| sentinel-handle-check.service | 21894 | 9692 | 9692 | PASS; child exit 0; probe detached; service exit 0 |
+
+- IDs and PIDs above are recorded evidence for those runs, not reusable policy bindings. Directory inode values coincided but were diagnostic only in these canonical checks.
+- scope_identity_check.py is retained as the earlier inode-comparison diagnostic. scope_handle_check.py is the canonical lookup diagnostic.
+- These tests validate real LSM attachment and identifier agreement for the tested children. A kernel scope filter, independent execution-outcome harness, blocking and prior-denial composition tests remain pending. Launching the diagnostic in a service did not restrict its LSM hook to that cgroup.
+- The last build-tools installation reported 535 other package upgrades pending. A fully patched user-space baseline is not claimed. No accuracy or performance benchmark was performed.
+
 ## Research question and scope
 
 Can valid tests guided by a precise policy specification and current state find and explain execution-policy mismatches more efficiently than valid random testing?
@@ -53,8 +75,8 @@ Start with one allow/deny policy family, a dedicated workload and benign executa
 ## Milestones and next actions
 
 1. Completed: published the five-file baseline on `main`, commit `644af5a`.
-2. Completed: checked WSL and Ubuntu VM environments and reproduced the observer demonstration in Ubuntu. SentinelLab full clone and baseline snapshot are complete. BPF-LSM activation and a temporary BCC LSM probe test passed. Next: review pending security updates and choose the final supported lab kernel before building the controlled execution-outcome harness and reference enforcer.
-3. Completed: wrote a draft file-object contract and passed five Python model fixtures. Planned next: build independent execution-outcome checks and a workload-scoped reference enforcer after the environment review.
+2. Completed: checked WSL and Ubuntu VM environments, prepared the SentinelLab clone and snapshot, activated BPF-LSM, installed and test-booted Ubuntu GA 6.8.0-149, reproduced the observer demo and verified canonical cgroup-ID lookup. Pending: persistent lab boot selection and review of other package updates.
+3. Completed: wrote a draft file-object contract, passed five Python model fixtures and verified file-handle/kernel cgroup-ID agreement in two contexts. Next: implement an observation-only kernel scope filter with the controller outside a dedicated workload cgroup, then independent execution-outcome checks and a workload-scoped reference enforcer.
 4. Expand to approximately 15-20 deterministic cases and validate the harness with explicitly labelled faults in our own reference implementation.
 5. Compare deterministic, valid random and guided tests under equal budgets with repeated seeds. Add reactive selection and a reducer gradually; retain raw JSON/CSV and negative results.
 6. Review related work before claiming novelty. Investigate a small FLORAS example separately as a possible methodological connection. Add one real-engine adapter only after checking documented semantics. Defer concurrency and policy updates.
