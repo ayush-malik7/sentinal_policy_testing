@@ -122,8 +122,12 @@ relative to this contract. A later [seven-case diagnostic](mutant_basename_resul
 added a different-object copy with A's basename, expected DENY, and distinguished
 the two name-based faults in two fresh trials. This fixture uses the existing
 copy semantics; it does not add deletion/recreation or concurrent mutations.
-Next, define shared valid inputs, model-derived coverage and pilot evaluation
-rules before generator comparison, then broaden the supported fault set.
+The [pilot protocol](pilot_protocol_v0.md) now fixes the shared seven-case
+selection domain, model-derived feature coverage, budget, seeds and reporting
+rules before kernel comparison. The pure-Python preview is not enforcement
+evidence. Next, qualify and smoke-test the common runner before collecting
+pilot data, then broaden the fault set and specify stateful transitions.
+The ignore-inode mutant has not yet been run on the seventh fixture.
 An independent immutable experiment boundary is required before any
 scope-removing mutant. Actual prior-denial composition remains untested.
 Keep unsupported transitions outside v0 until their semantics and independent

@@ -2,7 +2,19 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: three planted fault families have been detected in fixed kernel diagnostics.** A new seven-case diagnostic distinguishes full-path and basename comparison using different file objects with the same filename. Random-versus-guided evaluation is not implemented.
+**Current status: three planted fault families have fixed kernel witnesses; random and model-feature-guided selectors have a validated plan preview and a versioned pilot protocol.** The common kernel pilot runner, smoke test and comparative results are not implemented yet.
+
+## Selection pilot: rules fixed before kernel measurement
+
+The [pilot protocol](docs/pilot_protocol_v0.md) fixes the same seven-case pool, four distinct selections per method, seeds 0 through 29 and exactly two fresh repetitions per seed. Random sampling is uniform without replacement. Guidance greedily adds uncovered single/pair semantic facts and breaks ties randomly, also without replacement. The selector cannot read mutant IDs, verdicts or known witness names.
+
+Preview the planner without sudo:
+
+    /usr/bin/python3 selection_plan.py --seed 0
+
+The reported VM preview selected four distinct cases for each method. Their declared feature coverage was 39/52 for random and 46/52 for guided. No fixture program ran and no BPF program was loaded by this preview. Those counts do not establish kernel coverage, improved detection or a security benefit.
+
+The protocol is committed with the planner before pilot kernel data is collected. Its known seven-case development domain and three planted faults are a small selection pilot, not held-out evaluation or stateful sequence generation. The common runner must qualify the actual fixture features and all three faults on the seven-case pool, pass a smoke test, and preserve failed, flaky and budget-exhausted runs in its reports.
 
 ## Same-basename witness (2026-11-11)
 
@@ -155,6 +167,8 @@ The LSM hook is attached system-wide and returns the incoming BPF decision uncha
 - `mutant_inode_check.py`: two fresh reference/mutant trials for a deliberate inode-comparison fault.
 - `mutant_path_check.py`: two fresh trials for requested-path/file-object confusion.
 - `mutant_basename_check.py`: seven-case reference/path/basename comparison with a same-name different-object witness.
+- `selection_plan.py`: pure-Python random/guided fixture-selection previews; no BPF or fixture execution.
+- `docs/pilot_protocol_v0.md`: pre-data pilot domain, coverage, budgets, seeds, repetitions and reporting rules.
 - `docs/mutant_basename_results_v0.md`: observed seven-case comparison, lifecycle notes and limits.
 - `docs/mutant_path_results_v0.md`: pathname fault observations and reproduction.
 - `docs/fault_catalog_v0.md`: observed, proposed and unexercised fault operators and their prerequisites.
@@ -180,6 +194,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Three scope-preserving fault families have witness cases; the seven-case diagnostic now distinguishes the two name-based faults in two fresh trials. The fault catalog separates observations from proposed or unexercised operators. Next: define the shared valid input domain and model-derived coverage features before a pilot generator comparison, then broaden the supported fault set. Real-engine integration remains later work. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
+The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Three scope-preserving fault families have witness cases. The finite selection domain and model-derived coverage rules are versioned in the pilot protocol. Next: implement and smoke-test the common kernel runner, including the inode mutant's previously untested seventh case, then collect the repeated equal-budget thirty-seed selection pilot. Broader faults, stateful sequence generation and real-engine integration remain later work. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
 
-Fixed diagnostics cover three planted fault families. A broader evaluated fault set, generators, reduction and comparative research evaluation are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
+Fixed diagnostics cover three planted fault families and a pure-Python selector preview is implemented. A broader evaluated fault set, stateful generators, reduction and comparative kernel results are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.

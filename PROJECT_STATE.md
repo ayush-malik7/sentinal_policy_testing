@@ -4,6 +4,16 @@
 **Repository:** https://github.com/ayush-malik7/sentinal_policy_testing
 **Checkpoint:** 2026-11-11
 
+## Selection preview and pre-data protocol (2026-11-11)
+
+- The seven-case basename result and source were published in 8c98221. This checkpoint records selection_plan.py and docs/pilot_protocol_v0.md before kernel pilot data.
+- The VM preview for seed 0 selected four distinct cases per method. Declared feature counts were random=39/52 and guided=46/52. This preview loaded no BPF program, executed no fixture and measured no detection outcome.
+- Coverage consists of single facts and pairs from scope, object equality, pathname equality, basename equality and setup operation. IDs, temporary names and concrete inode numbers are not coverage tokens. A neutral-case-ID relabelling check preserved selections locally.
+- Fixed settings: uniform random versus greedy feature novelty; both without replacement; common seven-case domain; budget four; seeds 0..29; exactly two fresh repetitions per seed. Mutant labels, verdicts and witness names are not selector inputs.
+- The protocol keeps non-detection within budget as >4, retains failures and flaky/inconclusive outcomes, and requires logical-trace comparison across repetitions rather than equality of ephemeral identifiers.
+- Local checks covered deterministic distinct-case plans, invalid inputs and filesystem-related feature declarations against the seven fixture layouts. Actual cgroup qualification, the common three-mutant runner and kernel pilot remain unimplemented. The prior seven-case diagnostic did not run ignore_inode on case seven.
+- Next: common-runner implementation, source/data reporting and a small smoke test, followed by the frozen thirty-seed pilot. Semantic preview coverage is not comparative detection evidence; this remains a finite selection pilot, not stateful sequence generation.
+
 ## Same-basename comparison (2026-11-11)
 
 - The pathname diagnostic and fault catalog were published in 8ce2650. This checkpoint adds mutant_basename_check.py and its result record.
@@ -63,7 +73,7 @@ Original environment: Ubuntu WSL2, BCC 0.35.0 and kernel 6.18.33.2-microsoft-sta
 
 Source Ubuntu VM before cloning, verified on 2026-11-10: Ubuntu 24.04.2 LTS, kernel 6.14.0-33-generic, Git 2.43.0. BCC imports successfully; kernel build directory and BTF are present. CONFIG_BPF_LSM=y, but the active LSM list does not include bpf. Access through MobaXterm SSH is working. The package versions and later SentinelLab LSM verification are recorded below. Pending system updates and the final lab kernel still need review.
 
-The observer does not prove execution success, prevention or policy correctness. It has name/path heuristics, truncation and event-loss gaps, no execveat coverage or network confirmation, and an unresolved user/kernel PID-number difference. Root can stop it. A Python policy-model core, independent execution-outcome harness and scoped reference enforcer are implemented. The fixed reference checks matched their expectations. Three planted fault families have kernel witnesses; a seven-case diagnostic distinguished full-path and basename comparison twice. A broader evaluated fault set, generators, reducer and comparative research evaluation remain pending.
+The observer does not prove execution success, prevention or policy correctness. It has name/path heuristics, truncation and event-loss gaps, no execveat coverage or network confirmation, and an unresolved user/kernel PID-number difference. Root can stop it. A Python policy-model core, independent execution-outcome harness and scoped reference enforcer are implemented. The fixed reference checks matched their expectations and three planted fault families have kernel witnesses. A pure-Python random/guided selection preview is implemented, with a pre-data protocol. The common kernel pilot, broader evaluated faults, stateful generators and reducer remain pending.
 
 ## SentinelLab LSM verification (2026-11-10)
 
@@ -119,7 +129,7 @@ Start with one allow/deny policy family, a dedicated workload and benign executa
 
 1. Completed: published the five-file baseline on `main`, commit `644af5a`.
 2. Completed: checked WSL and Ubuntu VM environments, prepared the SentinelLab clone and snapshot, activated BPF-LSM, installed and test-booted Ubuntu GA 6.8.0-149, reproduced the observer demo and verified canonical cgroup-ID lookup. Pending: persistent lab boot selection and review of other package updates.
-3. Completed: model/cgroup checks, independent kernel enforcement, and witnessed detection of three scope-preserving fault families, including a seven-case path/basename comparison. Next: specify shared valid inputs, model-derived coverage features and equal-budget pilot evaluation rules before implementing generators; broaden the supported fault set afterward. Add an immutable experiment boundary before any scope-removing mutant. Guidance must not read mutant labels or known witness names.
+3. Completed: model/cgroup checks, independent kernel enforcement, three witnessed planted-fault families, a selector preview and a pre-data pilot protocol. Next: implement and smoke-test the common kernel runner, qualify all three mutants on the seven-case domain, and collect the repeated thirty-seed pilot under the fixed rules. Stateful generation and broader faults follow. Add an immutable experiment boundary before any scope-removing mutant. Guidance must not read mutant labels or known witness names.
 4. Expand to approximately 15-20 deterministic cases and validate the harness with explicitly labelled faults in our own reference implementation.
 5. Compare deterministic, valid random and guided tests under equal budgets with repeated seeds. Add reactive selection and a reducer gradually; retain raw JSON/CSV and negative results.
 6. Review related work before claiming novelty. Investigate a small FLORAS example separately as a possible methodological connection. Add one real-engine adapter only after checking documented semantics. Defer concurrency and policy updates.
