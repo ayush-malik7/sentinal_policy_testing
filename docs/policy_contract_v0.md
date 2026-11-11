@@ -128,8 +128,13 @@ rules before kernel comparison. The pure-Python preview is not enforcement
 evidence. The [common-runner calibration](calibration_results_v0.md) passed
 all seven baseline and reference cases in two fresh repetitions and qualified
 all three planted faults, including ignore_inode on the seventh fixture.
-Next, commit the calibrated source and report, pass a seeded smoke test, then
-collect pilot data before broadening the fault set or stateful transitions.
+The calibrated source and report were published in 9fb5bfa. A separate
+[seed-0 smoke run](selection_smoke_results_v0.md) passed in two fresh repetitions:
+first mismatch was random/guided = 1/1 for ignore_inode, 2/4 for the
+requested-path fault and 1/1 for basename_identity. This smoke run is
+separate from main-pilot data and does not establish a strategy advantage.
+Next, preserve its raw report and collect fresh main runs for seeds 0..29
+under the unchanged protocol before expanding faults or stateful transitions.
 The frozen protocol retains its original pre-runner status text as history.
 An independent immutable experiment boundary is required before any
 scope-removing mutant. Actual prior-denial composition remains untested.
