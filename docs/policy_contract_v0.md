@@ -125,11 +125,15 @@ copy semantics; it does not add deletion/recreation or concurrent mutations.
 The [pilot protocol](pilot_protocol_v0.md) now fixes the shared seven-case
 selection domain, model-derived feature coverage, budget, seeds and reporting
 rules before kernel comparison. The pure-Python preview is not enforcement
-evidence. Next, qualify and smoke-test the common runner before collecting
-pilot data, then broaden the fault set and specify stateful transitions.
-The ignore-inode mutant has not yet been run on the seventh fixture.
+evidence. The [common-runner calibration](calibration_results_v0.md) passed
+all seven baseline and reference cases in two fresh repetitions and qualified
+all three planted faults, including ignore_inode on the seventh fixture.
+Next, commit the calibrated source and report, pass a seeded smoke test, then
+collect pilot data before broadening the fault set or stateful transitions.
+The frozen protocol retains its original pre-runner status text as history.
 An independent immutable experiment boundary is required before any
 scope-removing mutant. Actual prior-denial composition remains untested.
 Keep unsupported transitions outside v0 until their semantics and independent
-measurements are specified. Persistent boot selection and remaining package
-updates still need review.
+measurements are specified. Persistent boot selection of 6.8.0-149-generic
+was verified after reboot. Remaining package updates still need review;
+changed experimental environments require requalification.

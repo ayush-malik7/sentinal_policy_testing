@@ -4,6 +4,18 @@
 **Repository:** https://github.com/ayush-malik7/sentinal_policy_testing
 **Checkpoint:** 2026-11-11
 
+## Common-runner calibration (2026-11-11)
+
+- The frozen planner and protocol were published in 1189529 before this run. selection_kernel.py adds a shared runner; this checkpoint leaves selection_plan.py and docs/pilot_protocol_v0.md unchanged.
+- Reported run: kernel 6.8.0-149-generic; protocol sentinel-fixture-selection-v0; service invocation d1b9fc651d1a4d5b83ac9bd1e0fa6d42. Fresh workload IDs were 10150 and 10228. These IDs are historical evidence, not reusable bindings.
+- Each repetition passed all seven baselines and all seven reference cases. Ignore-inode mismatches were deny_other, deny_copy and deny_same_basename. Requested-path mismatches were allow_symlink and allow_renamed. Basename mismatches were allow_symlink, allow_renamed and deny_same_basename. Both repetitions produced the same expected fault signatures.
+- Controlled fixture exec attempts: 70 total = 14 baseline + 14 reference + 14 for each of three mutants. All eight policy probes detached, both workload groups were removed, and the service exited 0. Whole-service runtime was 40.620 seconds; this includes setup, compilation and cleanup and is not enforcement overhead.
+- The common runner qualifies fixture features, checks child membership before exec, records independent exec outcomes and writes unique JSONL reports. Smoke/pilot modes require committed, unchanged experimental inputs and validated prerequisite reports with matching source/program hashes and environment.
+- Calibration report: results/calibration_seedNone_20261111T014845Z_e2fa36c1.jsonl. Commit the existing VM report alongside the exact runner; this documentation patch does not create or replace either file. Report: [calibration_results_v0.md](docs/calibration_results_v0.md).
+- The persistent GRUB default now names Ubuntu, with Linux 6.8.0-149-generic in Advanced options for Ubuntu. The generated default and syntax check passed; reboot confirmed this kernel and active BPF-LSM. Other package-update review remains pending.
+- tests/test_selection_kernel.py contains nine pure-Python selector/report checks. Its synthetic reports are unit-test fixtures, not experimental evidence. These tests do not load BPF.
+- Next: preserve and commit this calibration checkpoint, then run the separate seed-0 smoke test. No random/guided effectiveness result or thirty-seed pilot result has been collected. Earlier-denial composition and broader/stateful evaluation remain untested.
+
 ## Selection preview and pre-data protocol (2026-11-11)
 
 - The seven-case basename result and source were published in 8c98221. This checkpoint records selection_plan.py and docs/pilot_protocol_v0.md before kernel pilot data.
@@ -73,7 +85,7 @@ Original environment: Ubuntu WSL2, BCC 0.35.0 and kernel 6.18.33.2-microsoft-sta
 
 Source Ubuntu VM before cloning, verified on 2026-11-10: Ubuntu 24.04.2 LTS, kernel 6.14.0-33-generic, Git 2.43.0. BCC imports successfully; kernel build directory and BTF are present. CONFIG_BPF_LSM=y, but the active LSM list does not include bpf. Access through MobaXterm SSH is working. The package versions and later SentinelLab LSM verification are recorded below. Pending system updates and the final lab kernel still need review.
 
-The observer does not prove execution success, prevention or policy correctness. It has name/path heuristics, truncation and event-loss gaps, no execveat coverage or network confirmation, and an unresolved user/kernel PID-number difference. Root can stop it. A Python policy-model core, independent execution-outcome harness and scoped reference enforcer are implemented. The fixed reference checks matched their expectations and three planted fault families have kernel witnesses. A pure-Python random/guided selection preview is implemented, with a pre-data protocol. The common kernel pilot, broader evaluated faults, stateful generators and reducer remain pending.
+The observer does not prove execution success, prevention or policy correctness. It has name/path heuristics, truncation and event-loss gaps, no execveat coverage or network confirmation, and an unresolved user/kernel PID-number difference. Root can stop it. A Python policy-model core, independent execution-outcome harness and scoped reference enforcer are implemented. The fixed reference checks matched their expectations and three planted fault families have kernel witnesses. The frozen selector/protocol and common kernel runner are implemented. The runner passed seven-case calibration in two fresh repetitions. A seeded smoke test, comparative pilot data, broader evaluated faults, stateful generators and reducer remain pending.
 
 ## SentinelLab LSM verification (2026-11-10)
 
@@ -128,8 +140,8 @@ Start with one allow/deny policy family, a dedicated workload and benign executa
 ## Milestones and next actions
 
 1. Completed: published the five-file baseline on `main`, commit `644af5a`.
-2. Completed: checked WSL and Ubuntu VM environments, prepared the SentinelLab clone and snapshot, activated BPF-LSM, installed and test-booted Ubuntu GA 6.8.0-149, reproduced the observer demo and verified canonical cgroup-ID lookup. Pending: persistent lab boot selection and review of other package updates.
-3. Completed: model/cgroup checks, independent kernel enforcement, three witnessed planted-fault families, a selector preview and a pre-data pilot protocol. Next: implement and smoke-test the common kernel runner, qualify all three mutants on the seven-case domain, and collect the repeated thirty-seed pilot under the fixed rules. Stateful generation and broader faults follow. Add an immutable experiment boundary before any scope-removing mutant. Guidance must not read mutant labels or known witness names.
+2. Completed: checked WSL and Ubuntu VM environments, prepared the SentinelLab clone and snapshot, activated BPF-LSM, installed Ubuntu GA 6.8.0-149, selected it as the persistent lab default and verified it after reboot, reproduced the observer demo and verified canonical cgroup-ID lookup. Pending: review of other package updates and requalification after experimental environment changes.
+3. Completed: model/cgroup checks, independent kernel enforcement, three witnessed planted-fault families, a selector preview, a pre-data pilot protocol and common-runner calibration of all three mutants on all seven cases in two fresh repetitions. Next: commit the calibrated source and report, pass the seeded smoke test, then collect the repeated thirty-seed pilot under the frozen rules. Stateful generation and broader faults follow. Add an immutable experiment boundary before any scope-removing mutant. Guidance must not read mutant labels or known witness names.
 4. Expand to approximately 15-20 deterministic cases and validate the harness with explicitly labelled faults in our own reference implementation.
 5. Compare deterministic, valid random and guided tests under equal budgets with repeated seeds. Add reactive selection and a reducer gradually; retain raw JSON/CSV and negative results.
 6. Review related work before claiming novelty. Investigate a small FLORAS example separately as a possible methodological connection. Add one real-engine adapter only after checking documented semantics. Defer concurrency and policy updates.

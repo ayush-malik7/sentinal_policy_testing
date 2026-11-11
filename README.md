@@ -2,7 +2,23 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: three planted fault families have fixed kernel witnesses; random and model-feature-guided selectors have a validated plan preview and a versioned pilot protocol.** The common kernel pilot runner, smoke test and comparative results are not implemented yet.
+**Current status: the common kernel runner passed seven-case calibration for the reference enforcer and three planted fault families in two fresh repetitions.** The frozen random/guided selectors are implemented; the seeded smoke test and thirty-seed comparison remain pending.
+
+## Common-runner calibration (2026-11-11)
+
+The reported SentinelLab run on kernel 6.8.0-149-generic completed both fresh repetitions:
+
+| Phase | Repetition 1 | Repetition 2 |
+|---|---|---|
+| Baseline, no Sentinel probe | 7/7 executed successfully | 7/7 executed successfully |
+| Correct reference | 7/7 matched the model | 7/7 matched the model |
+| Ignore inode | 3 expected false allows | 3 expected false allows |
+| Requested-path identity | 2 expected false denials | 2 expected false denials |
+| Basename identity | 2 expected false denials and 1 false allow | 2 expected false denials and 1 false allow |
+
+This comprises 70 controlled fixture exec attempts. All eight policy probes detached, both workload cgroups were removed, and the service exited 0. The ignore-inode operator is now also qualified on the seventh, same-basename case. Outcomes are checked using the native ELF marker, exec-error pipe and child status.
+
+This calibration checks known fixed signatures. It does not measure random/guided effectiveness. See [the calibration record and reproduction instructions](docs/calibration_results_v0.md) and [the raw JSONL report](results/calibration_seedNone_20261111T014845Z_e2fa36c1.jsonl). The protocol and selection source remain frozen at their 1189529 versions.
 
 ## Selection pilot: rules fixed before kernel measurement
 
@@ -14,7 +30,7 @@ Preview the planner without sudo:
 
 The reported VM preview selected four distinct cases for each method. Their declared feature coverage was 39/52 for random and 46/52 for guided. No fixture program ran and no BPF program was loaded by this preview. Those counts do not establish kernel coverage, improved detection or a security benefit.
 
-The protocol is committed with the planner before pilot kernel data is collected. Its known seven-case development domain and three planted faults are a small selection pilot, not held-out evaluation or stateful sequence generation. The common runner must qualify the actual fixture features and all three faults on the seven-case pool, pass a smoke test, and preserve failed, flaky and budget-exhausted runs in its reports.
+The protocol was committed with the planner in 1189529 before comparative kernel data. Its known seven-case development domain and three planted faults form a small selection pilot, not held-out evaluation or stateful sequence generation. The common runner has now passed calibration on this pool. Next, commit its exact source with the calibration report, pass a separate seeded smoke test, and then collect the thirty-seed pilot. Reports retain failed, flaky and budget-exhausted runs. The protocol's original status text records its pre-runner checkpoint and is preserved unchanged.
 
 ## Same-basename witness (2026-11-11)
 
@@ -168,6 +184,9 @@ The LSM hook is attached system-wide and returns the incoming BPF decision uncha
 - `mutant_path_check.py`: two fresh trials for requested-path/file-object confusion.
 - `mutant_basename_check.py`: seven-case reference/path/basename comparison with a same-name different-object witness.
 - `selection_plan.py`: pure-Python random/guided fixture-selection previews; no BPF or fixture execution.
+- `selection_kernel.py`: shared calibration, seeded smoke and one-seed pilot runner with independent outcomes and JSONL reports.
+- `tests/test_selection_kernel.py`: pure-Python report-validation and selector checks; synthetic records are not kernel results.
+- `docs/calibration_results_v0.md`: reported seven-case common-runner calibration, raw-report link and reproduction commands.
 - `docs/pilot_protocol_v0.md`: pre-data pilot domain, coverage, budgets, seeds, repetitions and reporting rules.
 - `docs/mutant_basename_results_v0.md`: observed seven-case comparison, lifecycle notes and limits.
 - `docs/mutant_path_results_v0.md`: pathname fault observations and reproduction.
@@ -194,6 +213,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Three scope-preserving fault families have witness cases. The finite selection domain and model-derived coverage rules are versioned in the pilot protocol. Next: implement and smoke-test the common kernel runner, including the inode mutant's previously untested seventh case, then collect the repeated equal-budget thirty-seed selection pilot. Broader faults, stateful sequence generation and real-engine integration remain later work. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. Persistent lab boot selection and remaining package updates also need review.
+The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Three scope-preserving fault families have witness cases and passed common-runner calibration on all seven cases in two fresh repetitions. The finite selection domain and model-derived coverage rules are frozen in the pilot protocol. Next: complete a seeded smoke test with committed inputs, then collect the repeated equal-budget thirty-seed selection pilot. Broader faults, stateful sequence generation and real-engine integration remain later work. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. The persistent lab default was set to 6.8.0-149-generic and verified after reboot. Review remaining package updates; requalify any changed experimental environment.
 
-Fixed diagnostics cover three planted fault families and a pure-Python selector preview is implemented. A broader evaluated fault set, stateful generators, reduction and comparative kernel results are not implemented. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
+Fixed diagnostics and common-runner calibration cover three planted fault families; random and model-feature-guided selectors are implemented. The seeded smoke run and comparative pilot data have not been collected. A broader evaluated fault set, stateful generators and reduction remain later work. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
