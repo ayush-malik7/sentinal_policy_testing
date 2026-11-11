@@ -1,0 +1,59 @@
+Running as unit: sentinel-enforcement-check.service; invocation ID: 1b5948d911a540439b814c4759b90a4d
+Mode: pilot; kernel: 6.8.0-149-generic; protocol: sentinel-fixture-selection-v0
+Raw report: /home/ayush/runtime-sentinel/results/pilot_seed7_20261111T144726Z_ea0b8499.jsonl
+REPETITION 1: fresh workload ID=23788
+WITNESS allowed='/tmp/sentinel-selection-wq2rjnms/pool-1-pxi3f4_q/deny_same_basename/program_a' identity=FileIdentity(major=8, minor=2, inode=3670108)
+WITNESS target='/tmp/sentinel-selection-wq2rjnms/pool-1-pxi3f4_q/deny_same_basename/other/program_a' identity=FileIdentity(major=8, minor=2, inode=3670109)
+WITNESS: same basename 'program_a', different paths and inodes.
+REPETITION 1: BASELINE PASS 7/7
+REPETITION 1: compiling reference...
+REPETITION 1: reference detached.
+REPETITION 1: REFERENCE PASS 7/7
+REPETITION 1: compiling ignore_inode...
+REPETITION 1: ignore_inode detached.
+REPETITION 1: ignore_inode guided: first_mismatch=4
+REPETITION 1: ignore_inode random: first_mismatch=2
+REPETITION 1: compiling requested_path_identity...
+REPETITION 1: requested_path_identity detached.
+REPETITION 1: requested_path_identity guided: first_mismatch=1
+REPETITION 1: requested_path_identity random: first_mismatch=1
+REPETITION 1: compiling basename_identity...
+REPETITION 1: basename_identity detached.
+REPETITION 1: basename_identity guided: first_mismatch=1
+REPETITION 1: basename_identity random: first_mismatch=1
+REPETITION 1: workload removed.
+REPETITION 2: fresh workload ID=23806
+WITNESS allowed='/tmp/sentinel-selection-wq2rjnms/pool-2-5mz75vbr/deny_same_basename/program_a' identity=FileIdentity(major=8, minor=2, inode=3670108)
+WITNESS target='/tmp/sentinel-selection-wq2rjnms/pool-2-5mz75vbr/deny_same_basename/other/program_a' identity=FileIdentity(major=8, minor=2, inode=3670109)
+WITNESS: same basename 'program_a', different paths and inodes.
+REPETITION 2: BASELINE PASS 7/7
+REPETITION 2: compiling reference...
+REPETITION 2: reference detached.
+REPETITION 2: REFERENCE PASS 7/7
+REPETITION 2: compiling ignore_inode...
+REPETITION 2: ignore_inode detached.
+REPETITION 2: ignore_inode random: first_mismatch=2
+REPETITION 2: ignore_inode guided: first_mismatch=4
+REPETITION 2: compiling requested_path_identity...
+REPETITION 2: requested_path_identity detached.
+REPETITION 2: requested_path_identity random: first_mismatch=1
+REPETITION 2: requested_path_identity guided: first_mismatch=1
+REPETITION 2: compiling basename_identity...
+REPETITION 2: basename_identity detached.
+REPETITION 2: basename_identity random: first_mismatch=1
+REPETITION 2: basename_identity guided: first_mismatch=1
+REPETITION 2: workload removed.
+ignore_inode random: first_mismatch=2; repeated=True
+ignore_inode guided: first_mismatch=4; repeated=True
+requested_path_identity random: first_mismatch=1; repeated=True
+requested_path_identity guided: first_mismatch=1; repeated=True
+basename_identity random: first_mismatch=1; repeated=True
+basename_identity guided: first_mismatch=1; repeated=True
+PILOT PASS: one seed; this is not the thirty-seed result.
+Complete raw report: /home/ayush/runtime-sentinel/results/pilot_seed7_20261111T144726Z_ea0b8499.jsonl
+Finished with result: success
+Main processes terminated with: code=exited/status=0
+Service runtime: 33.004s
+CPU time consumed: 27.964s
+Memory peak: 22.4M
+Memory swap peak: 0B

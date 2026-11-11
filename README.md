@@ -2,7 +2,29 @@
 
 **Research direction:** Reactive, Specification-Guided Testing of Linux Execution Policies
 
-**Current status: the common kernel runner passed calibration and a seed-0 random/guided smoke test, each with two fresh repetitions.** In the smoke test, random found the pathname fault at selection 2 and guided at selection 4; the other two faults tied at selection 1. The thirty-seed pilot remains pending.
+**Current status: a frozen thirty-seed kernel pilot is complete.** Guided selection detected each of three planted faults within four tests in 30/30 seeds; random detected them in 29/30, 25/30 and 28/30 seeds. Random often detected faults earlier. These are descriptive results on seven known development fixtures in the project's own reference enforcer.
+
+## Thirty-seed pilot results (2026-11-11)
+
+Both strategies selected four distinct cases per seed under the protocol frozen in 1189529. Main collection used source commit 8c6780a, seeds 0..29 and two fresh confirmation repetitions per seed. All thirty main reports passed verification; calibration and smoke data are separate.
+
+| Planted fault | Random: detected by test 4 | Guided: detected by test 4 |
+|---|---:|---:|
+| Ignore inode | 29/30 | 30/30 |
+| Requested pathname | 25/30 | 30/30 |
+| Basename | 28/30 | 30/30 |
+
+Guided improved detection by the four-test budget in this finite pilot. Random detected more seeds by test 2 for every fault. For the pathname fault, guided was earlier in 7 seeds, tied in 12 and later in 11. The result shows a detection-versus-earliness trade-off, not a general strategy advantage.
+
+![Cumulative first-mismatch detection within four selections](docs/figures/pilot_v0_detection.png)
+
+The main run contained 2,280 controlled exec attempts: 420 baselines, 420 reference controls and 1,440 mutant measurements. All controls matched, both repetitions agreed for every seed, all 240 policy probes detached and all 60 temporary workload groups were removed. Invalid, inconclusive and missing seed counts were zero. Undetected runs remain censored after test 4; no detection at test 5 is invented.
+
+Read [the full result and limitations](docs/pilot_results_v0.md), [the six-row distribution table](results/pilot_analysis_v0/summary.csv), [per-seed traces](results/pilot_analysis_v0/per_seed.csv) and [the batch audit](results/pilot_batch_v0/batch.jsonl). Reproduce the read-only verification and derived tables without sudo:
+
+```bash
+/usr/bin/python3 analyse_pilot_v0.py --check-derived results/pilot_analysis_v0
+```
 
 ## Seed-0 smoke result (2026-11-11)
 
@@ -16,7 +38,7 @@ The unchanged four-case plans produced these first mismatch positions in both fr
 
 Both repetitions passed all seven baselines and seven reference controls. The full run executed 76 controlled fixture attempts; all eight probes detached, both workload cgroups were removed, and the service exited 0. The reported whole-service runtime was 36.226 seconds, including compilation and qualification.
 
-Random detected the pathname fault two selections earlier in this seed. This one-seed smoke result does not establish either strategy's general advantage. Higher declared semantic coverage did not produce earlier pathname-fault detection here. Keep the frozen rules and collect fresh main-pilot runs for seeds 0..29; do not count this smoke run as main-pilot seed 0 or the two repetitions as two seeds.
+Random detected the pathname fault two selections earlier in this seed. This one-seed smoke result does not establish either strategy's general advantage. Higher declared semantic coverage did not produce earlier pathname-fault detection here. The later main pilot used fresh runs for seeds 0..29 under the unchanged rules. This smoke trace is excluded from main-pilot seed 0, and two confirmation repetitions count as one seed.
 
 See [the smoke record](docs/selection_smoke_results_v0.md) and [the raw JSONL](results/smoke_seed0_20261111T101821Z_cb3e1c3c.jsonl). The calibrated source and prerequisite report were published in 9fb5bfa before the smoke run.
 
@@ -46,7 +68,7 @@ Preview the planner without sudo:
 
 The reported VM preview selected four distinct cases for each method. Their declared feature coverage was 39/52 for random and 46/52 for guided. No fixture program ran and no BPF program was loaded by this preview. Those counts do not establish kernel coverage, improved detection or a security benefit.
 
-The protocol was committed with the planner in 1189529 before comparative kernel data. Its known seven-case development domain and three planted faults form a small selection pilot, not held-out evaluation or stateful sequence generation. The common runner has passed calibration on this pool and a separate seed-0 smoke test using the source and calibration published in 9fb5bfa. Next, preserve the smoke record and collect fresh main-pilot runs for all thirty seeds. Reports retain failed, flaky and budget-exhausted runs. The protocol's original status text records its pre-runner checkpoint and is preserved unchanged.
+The protocol was committed with the planner in 1189529 before comparative kernel data. Its known seven-case development domain and three planted faults form a small selection pilot, not held-out evaluation or stateful sequence generation. The common runner has passed calibration on this pool and a separate seed-0 smoke test using the source and calibration published in 9fb5bfa. The source and smoke were published before the main batch; fresh runs for all thirty seeds are now recorded above. Reports retain failed, flaky and budget-exhausted runs. The protocol's original status text records its pre-runner checkpoint and is preserved unchanged.
 
 ## Same-basename witness (2026-11-11)
 
@@ -201,6 +223,10 @@ The LSM hook is attached system-wide and returns the incoming BPF decision uncha
 - `mutant_basename_check.py`: seven-case reference/path/basename comparison with a same-name different-object witness.
 - `selection_plan.py`: pure-Python random/guided fixture-selection previews; no BPF or fixture execution.
 - `selection_kernel.py`: shared calibration, seeded smoke and one-seed pilot runner with independent outcomes and JSONL reports.
+- `selection_batch.py`: sequential thirty-seed collection with a durable audit and no automatic retries.
+- `analyse_pilot_v0.py`: read-only source/data validation, independent raw-outcome checks and descriptive tables.
+- `plot_pilot_v0.py`: optional Matplotlib figure generation from the verified summary.
+- `docs/pilot_results_v0.md`: completed main-pilot results, reproduction and limitations.
 - `tests/test_selection_kernel.py`: pure-Python report-validation and selector checks; synthetic records are not kernel results.
 - `docs/calibration_results_v0.md`: reported seven-case common-runner calibration, raw-report link and reproduction commands.
 - `docs/selection_smoke_results_v0.md`: repeated seed-0 first-detection positions, controls, raw-report link and limits.
@@ -230,6 +256,6 @@ A recorded development run produced `received=45 alerts=2 perf_lost=0 possibly_t
 
 Can tests guided by a precise execution-policy specification and current state find and explain mismatches more efficiently than valid random tests?
 
-The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Three scope-preserving fault families have witness cases and passed common-runner calibration on all seven cases in two fresh repetitions. The finite selection domain and model-derived coverage rules are frozen in the pilot protocol. A seed-0 smoke test passed with committed inputs and repeatable first-detection positions. Next: collect the repeated equal-budget thirty-seed selection pilot using fresh main runs and the unchanged rules. Broader faults, stateful sequence generation and real-engine integration remain later work. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. The persistent lab default was set to 6.8.0-149-generic and verified after reboot. Review remaining package updates; requalify any changed experimental environment.
+The draft contract, Python model, cgroup lookup and scope checks, independent execution-outcome harness and first scoped reference enforcer are implemented. Three scope-preserving fault families have witness cases and passed common-runner calibration on all seven cases in two fresh repetitions. The finite selection domain and model-derived coverage rules are frozen in the pilot protocol. A seed-0 smoke test passed with committed inputs and repeatable first-detection positions. The repeated equal-budget thirty-seed pilot is complete and its raw/derived results are recorded above. Next: publish and review this result, then specify a separate next-version evaluation with broader qualified faults and state transitions. Broader faults, stateful sequence generation and real-engine integration remain later work. Add an independent immutable experiment boundary before any scope-removing mutant; guidance must not consult mutant labels or known triggering-case names. Later work includes supported state transitions, valid random and coverage-guided generation, reduction and equal-budget evaluation over repeated seeds. The persistent lab default was set to 6.8.0-149-generic and verified after reboot. Review remaining package updates; requalify any changed experimental environment.
 
-Fixed diagnostics and common-runner calibration cover three planted fault families; random and model-feature-guided selectors are implemented. The seed-0 smoke measurements are recorded; the thirty-seed main-pilot data have not been collected. A broader evaluated fault set, stateful generators and reduction remain later work. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.
+Fixed diagnostics and common-runner calibration cover three planted fault families; random and model-feature-guided selectors are implemented. The seed-0 smoke and thirty-seed main-pilot measurements are recorded separately. The main result is descriptive evidence within this finite development domain. A broader evaluated fault set, stateful generators and reduction remain later work. The fixed-case enforcement result does not verify the full contract. No novelty, security vulnerability or performance improvement has been established.

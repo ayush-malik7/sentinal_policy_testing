@@ -133,8 +133,13 @@ The calibrated source and report were published in 9fb5bfa. A separate
 first mismatch was random/guided = 1/1 for ignore_inode, 2/4 for the
 requested-path fault and 1/1 for basename_identity. This smoke run is
 separate from main-pilot data and does not establish a strategy advantage.
-Next, preserve its raw report and collect fresh main runs for seeds 0..29
-under the unchanged protocol before expanding faults or stateful transitions.
+The later [thirty-seed main pilot](pilot_results_v0.md) completed under the
+unchanged protocol, with fresh main data for every seed 0..29 and two agreeing
+repetitions per seed. Guided detected each fault by four selections in 30/30
+seeds; random counts were 29/30, 25/30 and 28/30. Random often detected faults
+earlier. These descriptive results do not expand supported contract semantics.
+Keep v0 fixed; specify broader faults or stateful transitions in a separate
+evaluation after reviewing this result.
 The frozen protocol retains its original pre-runner status text as history.
 An independent immutable experiment boundary is required before any
 scope-removing mutant. Actual prior-denial composition remains untested.

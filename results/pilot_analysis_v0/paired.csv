@@ -1,0 +1,4 @@
+mutant,guided_earlier,observed_tie,guided_later,both_censored
+ignore_inode,5,19,6,0
+requested_path_identity,7,12,11,0
+basename_identity,3,16,11,0
