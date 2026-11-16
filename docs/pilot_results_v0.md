@@ -4,6 +4,11 @@ Recorded: 2026-11-11. Protocol: sentinel-fixture-selection-v0. Main collection
 commit: 8c6780a40ead4b797773bac5f9c6c8402d0d9e7c. This is a descriptive pilot
 on the project's own reference enforcer with three deliberately inserted faults.
 
+Documentation update: 2026-11-16. The added related-work discussion
+positions the completed pilot against earlier research. The collection date,
+experimental inputs, results, tables and reproduction commands below are
+unchanged.
+
 ## Result
 
 | Planted fault | Random: detected by test 4 | Guided: detected by test 4 |
@@ -168,6 +173,27 @@ PNG/SVG). It is not a kernel-runner dependency. Choose a new output prefix:
 ```bash
 /usr/bin/python3 plot_pilot_v0.py --summary results/pilot_analysis_v0/summary.json --output-prefix /tmp/sentinel-pilot-figure-v0
 ```
+
+## Related work and interpretation (added 2026-11-16)
+
+The comparison of structured access-control tests with random tests and
+mutation-based fault detection has prior literature. This pilot does not
+introduce that general method. The [related-work document](related_work_v0.md)
+identifies the closest precedents, explains the different correctness targets
+and records retrieval limits.
+
+The completed artifact contributes a reproducible, restricted Linux experiment:
+a file-identity contract, exact-cgroup C eBPF-LSM enforcement, separate userspace
+execution evidence and paired finite-fixture selection measurements. These
+properties describe the implementation; they are not a verified novelty claim.
+There was no comparative evaluation against the cited research systems.
+
+The finding remains the reported trade-off: guided detects all three planted
+faults by the final four-case budget in every seed, while random detects more
+seeds by step two for every fault. The study does not establish that guidance
+is generally faster or that it transfers to new cases, faults or engines.
+An explicit combinatorial baseline and independently designed cases would be
+useful questions for a future version, not retroactive changes to v0.
 
 ## Limits and next work
 

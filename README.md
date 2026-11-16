@@ -73,6 +73,20 @@ and [policy contract](docs/policy_contract_v0.md). The
 the published runs used Ubuntu 24.04.2, kernel `6.8.0-149-generic`, Python 3.12.3
 and Ubuntu BCC packages `0.29.1+ds-1ubuntu7`, with cgroup v2 and BPF-LSM active.
 
+## Relation to earlier research
+
+Model-based access-control testing, mutation-based evaluation and comparison
+against random tests are established methods. Sentinel applies those ideas to
+a narrow Linux execution-policy pilot; it does not claim to have invented them.
+Its particular implementation and measurement setup do not by themselves
+establish novelty.
+
+The [related-work comparison](docs/related_work_v0.md), added on 2026-11-16,
+identifies close precedents, the scope of the completed artifact and questions
+for a separately specified next evaluation. It is a targeted narrative review,
+not proof that no similar system exists. This addition leaves the frozen v0
+experiment and its measurements unchanged.
+
 ## Scope of this result
 
 This is a small pilot on known development cases in the project's own reference
