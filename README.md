@@ -1,98 +1,50 @@
 # Sentinel
 
-Sentinel tests a Linux rule that allows one executable file inside a chosen
-workload group and denies other files. The question is: **can choosing tests
-from policy features find broken rules with fewer tests than choosing randomly?**
+**Kernel-level execution-policy enforcement and specification-guided testing for Linux (eBPF-LSM + cgroup v2).**
 
-The first pilot compares random selection with a feature-guided selector over
-seven prepared cases and three deliberately inserted faults. Each method gets
-four distinct cases per seed, across thirty seeds.
+Sentinel tests a Linux `bprm_check_security` rule that allows one executable file (identified by device major, device minor, and inode) inside a chosen cgroup v2 workload and denies other executables with `EPERM`. It also provides a cgroup-scoped sandbox demo for untrusted AI agents.
 
-## Main result
+```
+Controlled case ─┬─► Python model (expected_decision) ──┐
+                 │                                      ├─► Compare & detect fault
+                 └─► eBPF-LSM enforcer ─► ELF marker / EPERM / exit status
+```
 
-| Planted fault | Random: detected by test 4 | Guided: detected by test 4 |
-|---|---:|---:|
-| Ignore inode | 29/30 | 30/30 |
-| Requested pathname | 25/30 | 30/30 |
-| Basename | 28/30 | 30/30 |
+## Key Results (30-Seed Pilot)
 
-Guided detected every fault by test four. **Random detected more seeds by
-test two for every fault.** For the pathname fault, guided was earlier in
-7 seeds, tied in 12 and later in 11. This shows a trade-off between finding
-faults within the budget and finding them sooner, rather than a general
-advantage for either method.
+Each strategy selects 4 distinct cases per seed across 30 paired seeds (2,280 controlled execution attempts on Ubuntu 24.04.2, kernel `6.8.0-149-generic`, BPF-LSM active).
+
+| Planted fault | v0 Random (by test 2 / 4) | v0 Guided (by test 2 / 4) | v1 Guided (by test 2 / 4)* |
+|---|---:|---:|---:|
+| Ignore inode | 21/30 → 29/30 | 20/30 → **30/30** | **30/30** → **30/30** |
+| Requested pathname | 16/30 → 25/30 | 8/30 → **30/30** | **30/30** → **30/30** |
+| Basename | 20/30 → 28/30 | 11/30 → **30/30** | **30/30** → **30/30** |
+
+*\*v0 numbers are verified kernel runs (`docs/pilot_results_v0.md`); v1 numbers are from the pure-Python `selection_plan_v1.py` simulation fixing v0's step-1 15-token tie.*
 
 ![Faults detected within four selected tests](docs/figures/pilot_v0_detection.png)
 
-The [pilot report](docs/pilot_results_v0.md) contains the full distributions,
-controls and limitations. Each seed has two fresh confirmation repetitions;
-these do not count as extra independent samples. The main dataset contains
-2,280 execution attempts, and all thirty seed reports passed validation.
+## Repository Structure
 
-## What the code does
-
-The Python model predicts whether the policy should add a denial. The eBPF LSM
-enforcer applies that rule only to processes in the exact chosen cgroup. Executable
-markers, exec errors and child exit status then show what actually happened,
-separately from the probe's decision logs.
-
-The rule identifies a file by its device major number, device minor number
-and inode. The allowed file stays open during testing. A symlink or rename
-can still refer to that file; a separate copy has a different identity.
-`ALLOW` means Sentinel adds no denial; other Linux checks still apply.
-
-| Start here | Purpose |
+| Path | Purpose |
 |---|---|
-| [policy_model.py](policy_model.py) | Expected policy decisions and five file-identity fixtures |
-| [enforcement_check.py](enforcement_check.py) | First scoped enforcement and userspace outcome checks |
-| [selection_plan.py](selection_plan.py) | Random and greedy semantic-coverage selection |
-| [selection_kernel.py](selection_kernel.py) | Common kernel runner for the reference and three faults |
-| [selection_batch.py](selection_batch.py) | Sequential collection of thirty seeds |
-| [analyse_pilot_v0.py](analyse_pilot_v0.py) and [tests/](tests/) | Evidence validation and pure-Python checks |
+| `policy_model.py` | Expected-decision oracle and file-identity fixtures |
+| `enforcement_check.py` | Scoped eBPF-LSM enforcer and independent ELF-marker/errno harness |
+| `scope_handle_check.py` | Canonical userspace cgroup v2 ID lookup via `name_to_handle_at()` |
+| `mutant_*_check.py` | Three deliberate fault mutants (`ignore_inode`, `path`, `basename`) |
+| `selection_plan.py` / `selection_plan_v1.py` | Frozen v0 selectors and boundary-weighted v1 selector |
+| `selection_kernel.py` / `selection_batch.py` | 30-seed kernel runner and durable audit launcher |
+| `agent_sandbox_demo.py` | Untrusted AI-agent cgroup sandbox demo (uses the BPF-LSM enforcer) |
+| `analyse_pilot_v0.py` / `plot_pilot_v0.py` | Read-only v0 evidence verifier and figure generator |
+| `docs/`, `results/`, `tests/` | Specifications, frozen v0 pilot data, and pure-Python unit tests |
+| `archive/` | Earlier class prototypes (`phase3_sentinel.py`, `phase4_demo.py`, `scope_identity_check.py`) |
+| `report/` | Standalone research report (separate from code) |
 
-The original observer demo and the smaller diagnostics remain in the repo.
-Their development records are linked from the [history index](docs/history/README.md).
-
-## Check the published result
-
-From the repository directory, with Python 3.12 on Linux:
+## Quick Reproduce (No Sudo / No BPF Required)
 
 ```bash
 /usr/bin/python3 analyse_pilot_v0.py --check-derived results/pilot_analysis_v0
+/usr/bin/python3 selection_plan_v1.py --compare-v0
+/usr/bin/python3 agent_sandbox_demo.py --model-only
 /usr/bin/python3 -m unittest discover -s tests -v
 ```
-
-These commands read the saved evidence and run pure-Python tests. They need
-no sudo and load no BPF program. See the [raw reports](results/),
-[summary table](results/pilot_analysis_v0/summary.csv) and
-[per-seed results](results/pilot_analysis_v0/per_seed.csv).
-
-For the experiment's rules, read the [frozen protocol](docs/pilot_protocol_v0.md)
-and [policy contract](docs/policy_contract_v0.md). The
-[collection guide](docs/pilot_collection_v0.md) describes the qualified lab;
-the published runs used Ubuntu 24.04.2, kernel `6.8.0-149-generic`, Python 3.12.3
-and Ubuntu BCC packages `0.29.1+ds-1ubuntu7`, with cgroup v2 and BPF-LSM active.
-
-## Relation to earlier research
-
-Model-based access-control testing, mutation-based evaluation and comparison
-against random tests are established methods. Sentinel applies those ideas to
-a narrow Linux execution-policy pilot; it does not claim to have invented them.
-Its particular implementation and measurement setup do not by themselves
-establish novelty.
-
-The [related-work comparison](docs/related_work_v0.md), added on 2026-11-16,
-identifies close precedents, the scope of the completed artifact and questions
-for a separately specified next evaluation. It is a targeted narrative review,
-not proof that no similar system exists. This addition leaves the frozen v0
-experiment and its measurements unchanged.
-
-## Scope of this result
-
-This is a small pilot on known development cases in the project's own reference
-enforcer. It selects tests for prepared native ELF executables; it does not yet generate stateful
-filesystem sequences or evaluate a production security engine. Actual
-earlier-denial composition remains untested. The result does not establish
-novelty, a Linux vulnerability or a general performance improvement.
-
-See [PROJECT_STATE.md](PROJECT_STATE.md) for current status and open questions.
